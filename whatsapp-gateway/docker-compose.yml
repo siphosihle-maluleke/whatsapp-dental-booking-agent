@@ -1,0 +1,15 @@
+services:
+  openclaw-agent:
+    build: .
+    container_name: openclaw-agent
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    volumes:
+      - ./config:/app/config
+      - ./data/whatsapp_auth:/app/whatsapp_auth
+      - ./data/chat_history:/app/chat_history
+      - ./index.js:/app/index.js
+    network_mode: bridge

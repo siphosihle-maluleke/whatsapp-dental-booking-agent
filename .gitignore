@@ -10,3 +10,16 @@ token.json
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Dependencies & Build Artifacts
+node_modules/
+__pycache__/
+*.pyc
+venv/
+
+# WhatsApp Auth Sessions & Caches — NEVER COMMIT
+.wwebjs_auth/
+.wwebjs_cache/
+auth_info*/
+session*/
+*.session
