@@ -1,0 +1,12 @@
+﻿# Secrets & Credentials - NEVER COMMIT
+.env
+*.env
+credentials.json
+token.json
+*secret*
+*key*
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/

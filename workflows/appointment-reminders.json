@@ -1,0 +1,222 @@
+{
+  "name": "Automated Clinic Appointment Reminders & Review Requests",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "44aa2a71-6652-4c41-b326-b040228c6549",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_CALENDAR_ID",
+          "mode": "list",
+          "cachedResultName": "Clinic Calendar"
+        },
+        "options": {
+          "timeMin": "={{ $now.plus({ hours: 23, minutes: 30 }).toISO() }}",
+          "timeMax": "={{ $now.plus({ hours: 24 }).toISO() }}",
+          "singleEvents": true
+        }
+      },
+      "id": "9f11cb30-a095-418e-b1e4-12fd35aafaba",
+      "name": "Get Appointments (In 24h)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        -256
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  const desc = item.json.description || '';\n  const phoneMatch = desc.match(/Phone:\\s*([+\\d\\s()-]+)/i);\n  const nameMatch = desc.match(/Client:\\s*(.+)/i);\n  if (!phoneMatch) continue;\n\n  const rawPhone = phoneMatch[1].trim();\n  if (!rawPhone) continue;\n\n  const firstName = nameMatch ? nameMatch[1].trim().split(' ')[0] : 'there';\n  const startRaw = item.json.start?.dateTime || item.json.start?.date;\n  const startTime = startRaw\n    ? new Date(startRaw).toLocaleTimeString('en-ZA', {\n        hour: '2-digit',\n        minute: '2-digit',\n        timeZone: 'Africa/Johannesburg'\n      })\n    : 'your scheduled time';\n\n  results.push({\n    json: {\n      phone: rawPhone,\n      name: firstName,\n      time: startTime\n    }\n  });\n}\nreturn results;"
+      },
+      "id": "ed8b7029-9a2c-49b2-a377-983e79d15a1f",
+      "name": "Extract Client & Time",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_WHATSAPP_GATEWAY_HOST:3001/send-message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"secret\": \"YOUR_INTERNAL_WEBHOOK_SECRET\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"message\": \"Hi {{ $json.name }}! Just a friendly reminder of your appointment tomorrow at {{ $json.time }} with CarePoint Dental Clinic. Reply YES to confirm or let us know if you need to reschedule.\"\n}",
+        "options": {}
+      },
+      "id": "2d2fbc60-afc2-4ef3-8d52-e6a3bf8195d2",
+      "name": "Send 24h WhatsApp Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        -256
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "Primary Calendar"
+        },
+        "options": {
+          "timeMin": "={{ $now.minus({ hours: 1, minutes: 30 }).toISO() }}",
+          "timeMax": "={{ $now.minus({ hours: 1 }).toISO() }}",
+          "singleEvents": true
+        }
+      },
+      "id": "24fc9c6d-eae7-4888-a127-e2f2596d7920",
+      "name": "Get Completed Visits (1h Ago)",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        32
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "YOUR_GOOGLE_CALENDAR_CREDENTIAL_ID",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = [];\nfor (const item of $input.all()) {\n  const desc = item.json.description || '';\n  const phoneMatch = desc.match(/Phone:\\s*([+\\d\\s()-]+)/i);\n  const nameMatch = desc.match(/Client:\\s*(.+)/i);\n  if (!phoneMatch) continue;\n\n  const rawPhone = phoneMatch[1].trim();\n  if (!rawPhone) continue;\n\n  const firstName = nameMatch ? nameMatch[1].trim().split(' ')[0] : 'there';\n  results.push({\n    json: {\n      phone: rawPhone,\n      name: firstName\n    }\n  });\n}\nreturn results;"
+      },
+      "id": "3ce420ed-7954-4fdb-b7ea-4f2ca613b813",
+      "name": "Extract Client Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR_WHATSAPP_GATEWAY_HOST:3001/send-message",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"secret\": \"YOUR_INTERNAL_WEBHOOK_SECRET\",\n  \"phone\": \"{{ $json.phone }}\",\n  \"message\": \"Hi {{ $json.name }}, thank you for visiting CarePoint Dental Clinic today! If you were happy with your experience, would you mind taking 10 seconds to leave us a quick 5-star review on Google? It helps our local practice tremendously: YOUR_GOOGLE_REVIEW_URL\"\n}",
+        "options": {}
+      },
+      "id": "6169198e-6481-4753-9cca-bf745789c692",
+      "name": "Send 5-Star Google Review Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        32
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Appointments (In 24h)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Completed Visits (1h Ago)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Appointments (In 24h)": {
+      "main": [
+        [
+          {
+            "node": "Extract Client & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Client & Time": {
+      "main": [
+        [
+          {
+            "node": "Send 24h WhatsApp Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Completed Visits (1h Ago)": {
+      "main": [
+        [
+          {
+            "node": "Extract Client Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Client Details": {
+      "main": [
+        [
+          {
+            "node": "Send 5-Star Google Review Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "31ce9da2-162b-4647-a63a-56c3bc1cc3a9",
+  "meta": {
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "OtqNN7qXs76ucTa1",
+  "tags": []
+}
