@@ -1,0 +1,903 @@
+{
+  "version": "6.1",
+  "id": "oai6pbi8o61p18tovqtmx0b7",
+  "name": "Premium Clinic - Fast Track Engine (n8n Ready)",
+  "events": [
+    {
+      "id": "8955630410c64020bcbcf71f",
+      "outgoingEdgeId": "edge_start",
+      "graphCoordinates": {
+        "x": -546.71,
+        "y": -333.33
+      },
+      "type": "start"
+    }
+  ],
+  "groups": [
+    {
+      "id": "3e87f5c0fdf84bd68611844d",
+      "title": "Welcome & Triage",
+      "graphCoordinates": {
+        "x": -499.36,
+        "y": -136.34
+      },
+      "blocks": [
+        {
+          "id": "791eb17ca6c04aba8b33767b",
+          "type": "Set variable",
+          "options": {
+            "variableId": "var_start_time",
+            "type": "Now",
+            "timeZone": "Africa/Johannesburg"
+          }
+        },
+        {
+          "id": "d9882d5cbd334e18a6797a5f",
+          "type": "Set variable",
+          "options": {
+            "variableId": "var_practice",
+            "expressionToEvaluate": "CarePoint Medical Centre",
+            "type": "Custom"
+          }
+        },
+        {
+          "id": "884ca6bd109245acb475104c",
+          "type": "Set variable",
+          "options": {
+            "variableId": "var_practice_phone",
+            "expressionToEvaluate": "012 000 0000",
+            "type": "Custom"
+          }
+        },
+        {
+          "id": "8789d39c5575405185b42958",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Welcome to {{practice}}'s Digital Triage Desk. 🏥"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "gfr2jzn9a2az9yyvnynz8uto",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "id": "wtrv_wmaHY",
+                "type": "p",
+                "children": [
+                  {
+                    "text": "How can we help you today? Are you visiting us for the first time, or have you been here before? "
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "35bd2ad4fc8a4bae8b2d76dd",
+          "type": "choice input",
+          "items": [
+            {
+              "id": "24b6a2c856274e6298e8dffe",
+              "outgoingEdgeId": "edge_new",
+              "content": "I'm a new patient"
+            },
+            {
+              "id": "20d44a57bed94aebbedbf3db",
+              "outgoingEdgeId": "edge_exist",
+              "content": "I've been here before"
+            }
+          ],
+          "options": {
+            "variableId": "var_patient_type"
+          }
+        }
+      ]
+    },
+    {
+      "id": "6c42499be0314bc28966b4fd",
+      "title": "POPIA Consent (New)",
+      "graphCoordinates": {
+        "x": -86.69,
+        "y": -191.63
+      },
+      "blocks": [
+        {
+          "id": "9d4774d0d0d0409cae41608d",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "id": "jFLDXZWXuE",
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Since it's your first time, please note we collect your name and contact details to manage your booking. Your information is stored securely in compliance with the South African POPIA Act and is never shared. Do you consent to proceed?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8af53af4f3444e0b95320492",
+          "type": "choice input",
+          "items": [
+            {
+              "id": "a94011b412ae436e852875f3",
+              "outgoingEdgeId": "edge_consent_yes",
+              "content": "Yes, I consent"
+            },
+            {
+              "id": "86c5ef4adf0a4a899dcec0a4",
+              "outgoingEdgeId": "edge_consent_no",
+              "content": "No, thank you"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1890c0d4684f492ea7eef51b",
+      "title": "Opt Out",
+      "graphCoordinates": {
+        "x": 396.27,
+        "y": 61.24
+      },
+      "blocks": [
+        {
+          "id": "a046d0da5529451ca2bfeb73",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Understood. Privacy is paramount. Please call our reception directly at {{practice_phone}} to book manually."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "1924bdcbd74041a7ae0486f1",
+      "title": "Contact Details (New)",
+      "graphCoordinates": {
+        "x": 424.54,
+        "y": -422.91
+      },
+      "blocks": [
+        {
+          "id": "6374d060b9e54c929e455c99",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Okay, let's get you in the book. What is your full legal name?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "891a5e73f9c94252af1f5ae6",
+          "type": "text input",
+          "options": {
+            "labels": {
+              "placeholder": "Type your name...",
+              "button": "Send"
+            },
+            "variableId": "var_name",
+            "isLong": false
+          }
+        },
+        {
+          "id": "b8b651ea9ade41af8daff83d",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Perfect, thanks {{name}}. And what's the best WhatsApp number to reach you on?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "a7f20e88005c4e6ca70be8a9",
+          "outgoingEdgeId": "edge_from_new_contact",
+          "type": "phone number input",
+          "options": {
+            "variableId": "var_phone",
+            "labels": {
+              "button": "Send"
+            },
+            "defaultCountryCode": "ZA"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b2f275f883f74069b002a9d8",
+      "title": "Fast Track (Existing)",
+      "graphCoordinates": {
+        "x": -110,
+        "y": 369.33
+      },
+      "blocks": [
+        {
+          "id": "3ab5a637b7334d59bb8fedb1",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Welcome back! 👋 Let's get you booked in quickly. What is your full name so we can pull your file?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "932bb6e3a54140438e56e86e",
+          "type": "text input",
+          "options": {
+            "labels": {
+              "placeholder": "Type your name...",
+              "button": "Send"
+            },
+            "variableId": "var_name",
+            "isLong": false
+          }
+        },
+        {
+          "id": "exist_phone_prompt_01",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Thanks {{name}}! Confirm your WhatsApp number so we can send your booking reminder:"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "exist_phone_input_01",
+          "outgoingEdgeId": "edge_from_exist",
+          "type": "phone number input",
+          "options": {
+            "variableId": "var_phone",
+            "labels": {
+              "button": "Send"
+            },
+            "defaultCountryCode": "ZA"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ddaacfd932504ef18a6e7c39",
+      "title": "Service Selection",
+      "graphCoordinates": {
+        "x": 528.33,
+        "y": 396.67
+      },
+      "blocks": [
+        {
+          "id": "6d79ed5c7b014d8091532c68",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "What is the primary reason for your consultation today?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "dcf94376417743f88ba2abc9",
+          "type": "choice input",
+          "items": [
+            {
+              "id": "35b2b90a18bc447cbaf0786d",
+              "outgoingEdgeId": "e_srv_1",
+              "content": "💬 General Inquiry"
+            },
+            {
+              "id": "604f5fdb02424a3aaee754eb",
+              "outgoingEdgeId": "e_srv_urgent",
+              "content": "🚨 Urgent Care / Triage"
+            },
+            {
+              "id": "bebc3cc4e79d4a778dc41cf2",
+              "outgoingEdgeId": "e_srv_2",
+              "content": "🩺 General Illness / Checkup"
+            },
+            {
+              "id": "2ed967d1298c47ce9a618508",
+              "outgoingEdgeId": "e_srv_3",
+              "content": "💊 Prescription Renewal"
+            },
+            {
+              "id": "f185401d4d0c4b8aa65bd61c",
+              "outgoingEdgeId": "e_srv_4",
+              "content": "💉 Bloods / Lab Results"
+            }
+          ],
+          "options": {
+            "variableId": "var_service"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b8f9c371e17447d985e26966",
+      "title": "Urgent Care",
+      "graphCoordinates": {
+        "x": 1511.73,
+        "y": -509.97
+      },
+      "blocks": [
+        {
+          "id": "fb3409d9d3f7496889628952",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "I'm so sorry you're not feeling well. 😔 Just to be safe: If you are experiencing a severe emergency, please dial 112 or head to the ER."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "572bb6ac6d2846d8824f6cbd",
+          "outgoingEdgeId": "e_urg_to_pay",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "If it's urgent but not life-threatening, let's prioritize your booking right now."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "660a20de63f84a458de82123",
+      "title": "Payment Method",
+      "graphCoordinates": {
+        "x": 991.68,
+        "y": 771.66
+      },
+      "blocks": [
+        {
+          "id": "0fb53044f83340e9b1a681c6",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Got it. How will you be settling the account for today's visit?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "7ab8f0b3fe474ebc8036b0ac",
+          "type": "choice input",
+          "items": [
+            {
+              "id": "5d2bce4723504fd3bb9e28cc",
+              "outgoingEdgeId": "e_pay_aid",
+              "content": "Medical Aid"
+            },
+            {
+              "id": "aaa28ee98d1b4706942c1c71",
+              "outgoingEdgeId": "e_pay_cash",
+              "content": "Private (Cash/Card)"
+            }
+          ],
+          "options": {
+            "variableId": "var_payment"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b820e6eeb8c640a7afc69477",
+      "title": "Medical Aid Name",
+      "graphCoordinates": {
+        "x": 1688.32,
+        "y": 46.67
+      },
+      "blocks": [
+        {
+          "id": "5c8d6461b4f241a4990e0ca0",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Could you please type the name of your Medical Aid provider? (e.g., Discovery, GEMS, etc.)"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "40e9bc296d9744079d1f8113",
+          "outgoingEdgeId": "e_aid_to_slot",
+          "type": "text input",
+          "options": {
+            "labels": {
+              "placeholder": "Medical Aid name...",
+              "button": "Send"
+            },
+            "variableId": "var_specific_aid",
+            "isLong": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "7999bc6ed24246ec98e83336",
+      "title": "Slot Selection",
+      "graphCoordinates": {
+        "x": 2168.14,
+        "y": 520.69
+      },
+      "blocks": [
+        {
+          "id": "4c63a0de14c14b5c9c727087",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Fetching the doctor's live calendar... 🗓️ Please tap a suitable slot below:"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1fd2cc61d03a4e0d8e948c9b",
+          "outgoingEdgeId": "e_slot_to_save",
+          "type": "embed",
+          "content": {
+            "url": "https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID/exec?name={{name}}&phone={{phone_number}}&service={{service_type}}&practice={{practice}}&practice_phone={{practice_phone}}",
+            "height": 650,
+            "waitForEvent": {
+              "isEnabled": true,
+              "name": "slotBooked",
+              "saveDataInVariableId": "var_slot"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "405351a2e8cf4907b6e23089",
+      "title": "Finish & Save",
+      "graphCoordinates": {
+        "x": 2636.27,
+        "y": -95.41
+      },
+      "blocks": [
+        {
+          "id": "956002e8dc7d4d7ab4bc39ea",
+          "type": "Google Sheets",
+          "options": {
+            "sheetId": "0",
+            "spreadsheetId": "YOUR_GOOGLE_SHEET_ID",
+            "action": "Insert a row"
+          }
+        },
+        {
+          "id": "eb6f20a3df0e4ab995bde521",
+          "type": "Code",
+          "options": {
+            "content": "return Math.round((Date.now() - {{start_time}}) / 1000);"
+          }
+        },
+        {
+          "id": "7c0871cdfae749d59b136457",
+          "type": "Set variable",
+          "options": {
+            "variableId": "var_seconds",
+            "expressionToEvaluate": "{{script}}"
+          }
+        },
+        {
+          "id": "755675c534464739b47f78fc",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "Alright, {{name}}, you are all set! ✅ I've provisionally locked in your consultation for **{{booked_slot}}**."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "04102f20bd254866b58210db",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "You'll receive an automated WhatsApp reminder ahead of your visit. Feel better soon! 🌿"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8d4c55f724c44afbbd8cd101",
+          "type": "text",
+          "content": {
+            "richText": [
+              {
+                "type": "p",
+                "children": [
+                  {
+                    "text": "⚡ **Note for Practice Manager:** Captured in {{seconds}} seconds. That's how fast your patients will book! Head back to WhatsApp to discuss integration."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge_start",
+      "from": {
+        "eventId": "8955630410c64020bcbcf71f"
+      },
+      "to": {
+        "groupId": "3e87f5c0fdf84bd68611844d"
+      }
+    },
+    {
+      "id": "edge_new",
+      "from": {
+        "blockId": "35bd2ad4fc8a4bae8b2d76dd",
+        "itemId": "24b6a2c856274e6298e8dffe"
+      },
+      "to": {
+        "groupId": "6c42499be0314bc28966b4fd"
+      }
+    },
+    {
+      "id": "edge_exist",
+      "from": {
+        "blockId": "35bd2ad4fc8a4bae8b2d76dd",
+        "itemId": "20d44a57bed94aebbedbf3db"
+      },
+      "to": {
+        "groupId": "b2f275f883f74069b002a9d8"
+      }
+    },
+    {
+      "id": "edge_consent_yes",
+      "from": {
+        "blockId": "8af53af4f3444e0b95320492",
+        "itemId": "a94011b412ae436e852875f3"
+      },
+      "to": {
+        "groupId": "1924bdcbd74041a7ae0486f1"
+      }
+    },
+    {
+      "id": "edge_consent_no",
+      "from": {
+        "blockId": "8af53af4f3444e0b95320492",
+        "itemId": "86c5ef4adf0a4a899dcec0a4"
+      },
+      "to": {
+        "groupId": "1890c0d4684f492ea7eef51b"
+      }
+    },
+    {
+      "id": "edge_from_new_contact",
+      "from": {
+        "blockId": "a7f20e88005c4e6ca70be8a9"
+      },
+      "to": {
+        "groupId": "ddaacfd932504ef18a6e7c39"
+      }
+    },
+    {
+      "id": "edge_from_exist",
+      "from": {
+        "blockId": "exist_phone_input_01"
+      },
+      "to": {
+        "groupId": "ddaacfd932504ef18a6e7c39"
+      }
+    },
+    {
+      "id": "e_srv_1",
+      "from": {
+        "blockId": "dcf94376417743f88ba2abc9",
+        "itemId": "35b2b90a18bc447cbaf0786d"
+      },
+      "to": {
+        "groupId": "660a20de63f84a458de82123"
+      }
+    },
+    {
+      "id": "e_srv_urgent",
+      "from": {
+        "blockId": "dcf94376417743f88ba2abc9",
+        "itemId": "604f5fdb02424a3aaee754eb"
+      },
+      "to": {
+        "groupId": "b8f9c371e17447d985e26966"
+      }
+    },
+    {
+      "id": "e_srv_2",
+      "from": {
+        "blockId": "dcf94376417743f88ba2abc9",
+        "itemId": "bebc3cc4e79d4a778dc41cf2"
+      },
+      "to": {
+        "groupId": "660a20de63f84a458de82123"
+      }
+    },
+    {
+      "id": "e_srv_3",
+      "from": {
+        "blockId": "dcf94376417743f88ba2abc9",
+        "itemId": "2ed967d1298c47ce9a618508"
+      },
+      "to": {
+        "groupId": "660a20de63f84a458de82123"
+      }
+    },
+    {
+      "id": "e_srv_4",
+      "from": {
+        "blockId": "dcf94376417743f88ba2abc9",
+        "itemId": "f185401d4d0c4b8aa65bd61c"
+      },
+      "to": {
+        "groupId": "660a20de63f84a458de82123"
+      }
+    },
+    {
+      "id": "e_urg_to_pay",
+      "from": {
+        "blockId": "572bb6ac6d2846d8824f6cbd"
+      },
+      "to": {
+        "groupId": "660a20de63f84a458de82123"
+      }
+    },
+    {
+      "id": "e_pay_aid",
+      "from": {
+        "blockId": "7ab8f0b3fe474ebc8036b0ac",
+        "itemId": "5d2bce4723504fd3bb9e28cc"
+      },
+      "to": {
+        "groupId": "b820e6eeb8c640a7afc69477"
+      }
+    },
+    {
+      "id": "e_pay_cash",
+      "from": {
+        "blockId": "7ab8f0b3fe474ebc8036b0ac",
+        "itemId": "aaa28ee98d1b4706942c1c71"
+      },
+      "to": {
+        "groupId": "7999bc6ed24246ec98e83336"
+      }
+    },
+    {
+      "id": "e_aid_to_slot",
+      "from": {
+        "blockId": "40e9bc296d9744079d1f8113"
+      },
+      "to": {
+        "groupId": "7999bc6ed24246ec98e83336"
+      }
+    },
+    {
+      "id": "e_slot_to_save",
+      "from": {
+        "blockId": "1fd2cc61d03a4e0d8e948c9b"
+      },
+      "to": {
+        "groupId": "405351a2e8cf4907b6e23089"
+      }
+    }
+  ],
+  "variables": [
+    {
+      "id": "var_start_time",
+      "name": "start_time",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_practice",
+      "name": "practice",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_practice_phone",
+      "name": "practice_phone",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_patient_type",
+      "name": "patient_type",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_name",
+      "name": "name",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_phone",
+      "name": "phone_number",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_service",
+      "name": "service_type",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_payment",
+      "name": "medical_aid",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_specific_aid",
+      "name": "specific_medical_aid",
+      "isSessionVariable": false
+    },
+    {
+      "id": "var_slot",
+      "name": "booked_slot",
+      "isSessionVariable": true
+    },
+    {
+      "id": "var_seconds",
+      "name": "seconds",
+      "isSessionVariable": false
+    }
+  ],
+  "theme": {
+    "general": {
+      "font": {
+        "type": "Google",
+        "family": "Plus Jakarta Sans"
+      },
+      "background": {
+        "type": "Color",
+        "content": "#f8fafc"
+      },
+      "progressBar": {
+        "isEnabled": true,
+        "backgroundColor": "#2563eb"
+      }
+    },
+    "chat": {
+      "hostAvatar": {
+        "isEnabled": true,
+        "url": "https://YOUR_STORAGE_BUCKET/public/workspaces/YOUR_WORKSPACE_ID/typebots/YOUR_BOT_ID/hostAvatar"
+      },
+      "hostBubbles": {
+        "backgroundColor": "#ffffff",
+        "color": "#0f172a"
+      },
+      "guestBubbles": {
+        "backgroundColor": "#2563eb",
+        "color": "#ffffff"
+      },
+      "buttons": {
+        "backgroundColor": "#ffffff",
+        "color": "#0f172a"
+      },
+      "inputs": {
+        "backgroundColor": "#ffffff",
+        "color": "#0f172a"
+      }
+    },
+    "customCss": "@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');\n\n.typebot-container {\n  background-color: #f8fafc;\n  font-family: 'Plus Jakarta Sans', sans-serif !important;\n}\n\n.typebot-host-bubble {\n  background-color: #ffffff !important;\n  color: #0f172a !important;\n  border-radius: 16px 16px 16px 4px !important;\n  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;\n  border: 1px solid #f1f5f9;\n  font-weight: 500;\n}\n\n.typebot-guest-bubble {\n  background: linear-gradient(135deg, #2563eb, #1e40af) !important;\n  color: #ffffff !important;\n  border-radius: 16px 16px 4px 16px !important;\n  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2) !important;\n}\n\n.typebot-button {\n  background-color: #ffffff !important;\n  color: #0f172a !important;\n  border-radius: 12px !important;\n  font-weight: 600 !important;\n  border: 1px solid #e2e8f0 !important;\n  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;\n  transition: all 0.3s ease !important;\n}\n\n.typebot-button:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 6px 15px rgba(15, 23, 42, 0.08) !important;\n  border-color: #2563eb !important;\n  color: #2563eb !important;\n}\n\n.typebot-input {\n  border-radius: 12px !important;\n  border: 2px solid #e2e8f0 !important;\n  background-color: #ffffff !important;\n  transition: all 0.2s ease !important;\n}\n\n.typebot-input:focus {\n  border-color: #2563eb !important;\n  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;\n}\n\n.typebot-button.typebot-input-button {\n  background: #2563eb !important;\n  color: #ffffff !important;\n  border: none !important;\n  border-radius: 8px !important;\n}"
+  },
+  "selectedThemeTemplateId": null,
+  "settings": {
+    "general": {
+      "isBrandingEnabled": false
+    },
+    "typingEmulation": {
+      "enabled": true,
+      "speed": 350,
+      "maxDelay": 1.5
+    }
+  },
+  "createdAt": "2026-11-16T18:51:23.109Z",
+  "updatedAt": "2026-11-16T19:04:28.388Z",
+  "icon": null,
+  "folderId": null,
+  "publicId": "premium-clinic-fast-track-engine-n8-n-ready-qtmx0b7",
+  "customDomain": null,
+  "workspaceId": "YOUR_WORKSPACE_ID",
+  "resultsTablePreferences": null,
+  "isArchived": false,
+  "isClosed": false,
+  "whatsAppCredentialsId": null,
+  "riskLevel": null,
+  "spaceId": null
+}
