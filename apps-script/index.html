@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --navy:#0f172a; --blue:#2563eb; --muted:#64748b; --line:#e2e8f0; --off:#eef2f6; --offText:#94a3b8; --green:#16a34a; }
+  * { box-sizing:border-box; font-family:Inter,-apple-system,"Segoe UI",Arial,sans-serif; }
+  body { margin:0; background:#fff; color:var(--navy); }
+  .wrap { max-width:1000px; margin:0 auto; padding:22px 16px 18px; }
+  .top { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .lbl { font-size:14px; color:var(--muted); }
+  select { width:min(420px,100%); padding:11px 14px; font-size:15px; border:1px solid var(--line); border-radius:10px; background:#fff; color:var(--navy); }
+  .nav { display:flex; align-items:center; gap:8px; }
+  .nav button { width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--blue); font-size:22px; line-height:1; cursor:pointer; }
+  .nav button:disabled { opacity:.3; cursor:not-allowed; }
+  .range { min-width:250px; text-align:center; padding:11px 16px; border:1px solid var(--line); border-radius:10px; font-weight:600; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:10px; margin-top:22px; }
+  .day h3 { margin:0 0 10px; text-align:center; font-size:15px; font-weight:600; white-space:nowrap; }
+  .slot { display:block; width:100%; margin:0 0 10px; padding:16px 6px; border-radius:12px; border:1px solid var(--line); background:#fff; text-align:center; cursor:pointer; color:var(--navy); transition:all .15s ease; }
+  .slot .p { font-weight:600; font-size:14px; }
+  .slot .s { font-size:12px; margin-top:5px; color:var(--green); }
+  .slot.available:hover { border-color:var(--blue); box-shadow:0 6px 16px rgba(37,99,235,.15); transform:translateY(-1px); }
+  .slot.booked, .slot.closed, .slot.past { background:var(--off); cursor:not-allowed; border-color:var(--off); }
+  .slot.booked .p, .slot.closed .p, .slot.past .p { color:var(--muted); }
+  .slot.booked .s, .slot.closed .s, .slot.past .s { color:var(--offText); }
+  .slot.selected { border:2px solid var(--blue); background:#eff6ff; }
+  .times { display:none; margin-top:6px; padding:18px; border:1px solid var(--line); border-radius:14px; background:#f8fafc; }
+  .times h4 { margin:0 0 12px; font-size:15px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { padding:10px 16px; border-radius:999px; border:1px solid var(--line); background:#fff; font-weight:600; font-size:14px; cursor:pointer; color:var(--navy); }
+  .chip:hover { border-color:var(--blue); }
+  .chip.selected { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .confirm { margin-top:16px; width:100%; padding:15px; border:0; border-radius:12px; background:var(--navy); color:#fff; font-size:15px; font-weight:700; cursor:pointer; }
+  .confirm:disabled { opacity:.4; cursor:not-allowed; }
+  .msg { margin-top:12px; font-size:13px; color:#dc2626; text-align:center; min-height:16px; }
+  .note { margin-top:10px; font-size:12px; color:var(--muted); }
+  .done { display:none; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background:#f8fafc; }
+  .done .tick { width:64px; height:64px; margin:0 auto 14px; border-radius:50%; background:#dcfce7; color:var(--green); font-size:32px; line-height:64px; }
+  .done h2 { margin:0 0 8px; font-size:20px; }
+  .done p { margin:0; color:var(--muted); }
+  .loading { opacity:.45; pointer-events:none; }
+  @media (max-width:640px) {
+    .wrap { padding:14px 10px; }
+    .range { min-width:0; flex:1; font-size:13px; padding:10px 8px; }
+    .nav { width:100%; }
+    .grid { grid-template-columns:1fr; gap:6px; margin-top:14px; }
+    .day { display:grid; grid-template-columns:78px repeat(3,1fr); gap:6px; align-items:center; }
+    .day h3 { margin:0; text-align:left; font-size:13px; white-space:normal; }
+    .slot { margin:0; padding:10px 2px; border-radius:10px; }
+    .slot .p { font-size:12px; } .slot .s { font-size:11px; margin-top:3px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="top">
+    <div class="lbl" id="pracLbl">View appointments with:</div>
+    <select id="prac"></select>
+    <div class="nav">
+      <button id="prev" aria-label="Previous week">‹</button>
+      <div class="range" id="range">Loading…</div>
+      <button id="next" aria-label="Next week">›</button>
+    </div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="times" id="timesBox">
+    <h4 id="timesTitle"></h4>
+    <div class="chips" id="chips"></div>
+    <button class="confirm" id="confirm" disabled>Confirm booking</button>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div class="note" id="note"></div>
+</div>
+<div class="done" id="done">
+  <div class="tick">✓</div>
+  <h2>You're booked!</h2>
+  <p id="doneText"></p>
+</div>
+
+<script>
+const IS_GAS = typeof google !== 'undefined' && google.script && google.script.run;
+const $ = id => document.getElementById(id);
+const S = { week: 0, prac: -1, data: null, sel: null, time: null, params: {}, pracLoaded: false };
+
+const MOCK = {
+  getWeek(week, prac) {
+    const base = new Date(); base.setHours(0,0,0,0); base.setDate(base.getDate() + week*7);
+    const f = d => d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'}).replace(/^(\w+) /,'$1, ');
+    const days = [];
+    for (let i=0;i<7;i++) {
+      const d = new Date(base); d.setDate(base.getDate()+i);
+      const sun = d.getDay()===0, sat = d.getDay()===6, seed = (d.getDate()*7 + i + (prac+1)*3) % 5;
+      const mk = (name, ok, times) => ({ name, status: sun ? 'closed' : (ok ? 'available' : 'booked'), times: ok && !sun ? times : [] });
+      days.push({ date: d.toISOString().slice(0,10), label: f(d), periods: [
+        mk('Morning', seed!==2, ['08:00','08:30','09:30','10:00','11:30']),
+        mk('Afternoon', !sat && seed!==4, ['12:30','13:00','14:30','15:00']),
+        { name:'Evening', status: sun||sat ? 'closed':'booked', times:[] } ]});
+    }
+    return { rangeLabel: days[0].label+' - '+days[6].label, weekOffset: week, weeksAhead: 4,
+      practitioners: ['Dr. Naidoo','Dr. van der Merwe'], practiceName:'Pretoria East Dental', practicePhone:'012 000 0000', days };
+  },
+  bookSlot(p) { return { ok: true, label: p.label + ' with Dr. Naidoo' }; }
+};
+
+function api(fn, ...args) {
+  return new Promise((resolve, reject) => {
+    if (IS_GAS) google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](...args);
+    else setTimeout(() => resolve(MOCK[fn](...args)), 200);
+  });
+}
+function getParams() {
+  return new Promise(res => {
+    if (IS_GAS) google.script.url.getLocation(l => res(l.parameter || {}));
+    else res(Object.fromEntries(new URLSearchParams(location.search)));
+  });
+}
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+const STATUS_TEXT = { available: 'available', booked: 'fully booked', closed: 'closed', past: 'unavailable' };
+
+function load() {
+  $('app').classList.add('loading'); $('msg').textContent = '';
+  closeTimes();
+  api('getWeek', S.week, S.prac).then(render).catch(err => { $('msg').textContent = 'Could not load availability. ' + (err.message || err); })
+    .finally(() => $('app').classList.remove('loading'));
+}
+
+function render(d) {
+  S.data = d;
+  $('range').textContent = d.rangeLabel;
+  $('prev').disabled = d.weekOffset <= 0;
+  $('next').disabled = d.weekOffset >= d.weeksAhead - 1;
+  if (!S.pracLoaded) {
+    const sel = $('prac'); sel.innerHTML = '';
+    if (d.practitioners.length > 1) sel.appendChild(new Option('All Practitioners', '-1'));
+    d.practitioners.forEach((n, i) => sel.appendChild(new Option(n, String(i))));
+    if (d.practitioners.length === 1) { sel.style.display = 'none'; $('pracLbl').textContent = 'Appointments with ' + d.practitioners[0]; }
+    S.pracLoaded = true;
+  }
+  const grid = $('grid'); grid.innerHTML = '';
+  d.days.forEach((day, di) => {
+    const col = el('div', 'day');
+    col.appendChild(el('h3', null, day.label));
+    day.periods.forEach((per, pi) => {
+      const b = el('button', 'slot ' + per.status);
+      b.appendChild(el('div', 'p', per.name));
+      b.appendChild(el('div', 's', STATUS_TEXT[per.status]));
+      if (per.status === 'available') b.onclick = () => openTimes(di, pi, b);
+      else b.disabled = true;
+      col.appendChild(b);
+    });
+    grid.appendChild(col);
+  });
+  const name = S.params.practice || d.practiceName, phone = S.params.practice_phone || d.practicePhone;
+  $('note').textContent = '* Should you wish to make an appointment for a date not yet listed, please call ' + name + ' on ' + phone + '.';
+}
+
+function openTimes(di, pi, btn) {
+  document.querySelectorAll('.slot.selected').forEach(x => x.classList.remove('selected'));
+  btn.classList.add('selected');
+  S.sel = { di, pi }; S.time = null; $('confirm').disabled = true;
+  const day = S.data.days[di], per = day.periods[pi];
+  $('timesTitle').textContent = day.label + ' · ' + per.name + ' – choose a time';
+  const chips = $('chips'); chips.innerHTML = '';
+  per.times.forEach(t => {
+    const c = el('button', 'chip', t);
+    c.onclick = () => { chips.querySelectorAll('.chip').forEach(x => x.classList.remove('selected')); c.classList.add('selected'); S.time = t; $('confirm').disabled = false; };
+    chips.appendChild(c);
+  });
+  $('timesBox').style.display = 'block';
+  $('timesBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function closeTimes() { $('timesBox').style.display = 'none'; S.sel = null; S.time = null; }
+
+function notifyTypebot(slotLabel) {
+  const msg = { name: 'slotBooked', data: slotLabel };
+  let target = window;
+  for (let i = 0; i < 6; i++) {
+    try {
+      if (!target.parent || target.parent === target) break;
+      target = target.parent;
+      target.postMessage(msg, '*');
+    } catch (e) {
+      break;
+    }
+  }
+}
+
+function confirmBooking() {
+  if (!S.sel || !S.time) return;
+  const day = S.data.days[S.sel.di];
+  const payload = {
+    date: day.date,
+    time: S.time,
+    practitionerIndex: S.prac,
+    name: S.params.name || '',
+    phone: S.params.phone || S.params.phone_number || '',
+    service: S.params.service || '',
+    label: day.label + ' at ' + S.time
+  };
+  $('confirm').disabled = true; $('confirm').textContent = 'Booking…';
+  api('bookSlot', payload).then(res => {
+    if (!res.ok) { $('msg').textContent = res.message; load(); return; }
+    $('app').style.display = 'none'; $('done').style.display = 'flex';
+    $('doneText').textContent = res.label + '. A confirmation will follow on WhatsApp.';
+    notifyTypebot(res.label);
+  }).catch(err => { $('msg').textContent = 'Booking failed: ' + (err.message || err); })
+    .finally(() => { $('confirm').textContent = 'Confirm booking'; });
+}
+
+$('prev').onclick = () => { if (S.week > 0) { S.week--; load(); } };
+$('next').onclick = () => { S.week++; load(); };
+$('prac').onchange = e => { S.prac = Number(e.target.value); load(); };
+$('confirm').onclick = confirmBooking;
+
+getParams().then(p => { S.params = p; load(); });
+</script>
+</body>
+</html>
